@@ -1,9 +1,14 @@
 package com.example.taskflow.domain.repository
 
-import com.example.taskflow.domain.model.User
 import com.google.firebase.auth.FirebaseUser
 
 interface AuthRepository {
+
+    val currentUser: FirebaseUser?
+
+    fun isUserLoggedIn(): Boolean
+
+    fun isEmailVerified(): Boolean
 
     suspend fun login(
         email: String,
@@ -12,9 +17,17 @@ interface AuthRepository {
 
     suspend fun register(
         email: String,
-        password: String
+        password: String,
+        fullName: String
     ): Result<FirebaseUser?>
 
-    fun logout()
+    suspend fun sendPasswordResetEmail(
+        email: String
+    ): Result<Unit>
 
+    suspend fun sendEmailVerification(): Result<Unit>
+
+    suspend fun reloadUser(): Result<Boolean>
+
+    fun logout()
 }
