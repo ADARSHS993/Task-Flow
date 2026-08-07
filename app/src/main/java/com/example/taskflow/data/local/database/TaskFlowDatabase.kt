@@ -7,11 +7,14 @@ import com.example.taskflow.data.local.entity.TaskEntity
 
 @Database(
     entities = [
-        TaskEntity::class
+        TaskEntity::class,
+        CategoryEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class TaskFlowDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
+
+    abstract fun categoryDao(): CategoryDao
 }

@@ -79,47 +79,6 @@ fun HomeScreen(
     }
 
     Scaffold(
-        bottomBar = {
-            NavigationBar(
-                containerColor = Color.White,
-                tonalElevation = 8.dp
-            ) {
-                val items = listOf("Home", "Tasks", "Calendar", "Stats", "Profile")
-                val painters = listOf(
-                    rememberVectorPainter(Icons.Default.Home),
-                    painterResource(id = R.drawable.tasks),
-                    rememberVectorPainter(Icons.Default.DateRange),
-                    painterResource(id = R.drawable.state),
-                    rememberVectorPainter(Icons.Default.Person)
-                )
-
-                items.forEachIndexed { index, label ->
-                    val isSelected = selectedBottomNavIndex == index
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = { selectedBottomNavIndex = index },
-                        icon = {
-                            Icon(
-                                painter = painters[index],
-                                contentDescription = label,
-                                tint = if (isSelected) Color(0xFF1E232A) else Color(0xFF9CA3AF)
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = label,
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) Color(0xFF1E232A) else Color(0xFF9CA3AF)
-                            )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color(0xFF53E2F3)
-                        )
-                    )
-                }
-            }
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { /* Add new task action */ },

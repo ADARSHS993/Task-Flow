@@ -10,6 +10,7 @@ import com.example.taskflow.presentation.auth.login.LoginScreen
 import com.example.taskflow.presentation.auth.register.RegisterScreen
 import com.example.taskflow.presentation.auth.splash.SplashScreen
 import com.example.taskflow.presentation.home.HomeScreen
+import com.example.taskflow.presentation.tasks.TaskScreen
 
 @Composable
 fun AppNavGraph(
@@ -86,5 +87,6 @@ fun AppNavGraph(
                 }
             )
         }
+
     }
 }

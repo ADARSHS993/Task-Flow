@@ -1,6 +1,8 @@
 package com.example.taskflow.data.mapper
 
+import com.example.taskflow.data.local.entity.CategoryEntity
 import com.example.taskflow.data.local.entity.TaskEntity
+import com.example.taskflow.domain.model.Category
 import com.example.taskflow.domain.model.Priority
 import com.example.taskflow.domain.model.Task
 
@@ -16,6 +18,24 @@ fun TaskEntity.toDomain(): Task{
         categoryId = categoryId,
         createdAt = createdAt,
         updatedAt = updatedAt
+    )
+}
+
+fun CategoryEntity.toDomain(): Category{
+    return Category(
+        id = id,
+        name = name,
+        color = color,
+        icon = icon
+    )
+}
+
+fun Category.toEntity(): CategoryEntity{
+    return CategoryEntity(
+        id = id,
+        name = name,
+        color = color,
+        icon = icon
     )
 }
 
