@@ -1,7 +1,7 @@
 package com.example.taskflow.domain.model
 
 data class Category(
-    val id: String = "",
+    var id: String = "",
 
     val name: String,
 

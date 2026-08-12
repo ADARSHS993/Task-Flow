@@ -70,7 +70,7 @@ class TaskViewModel @Inject constructor(
 
     }
 
-    fun deleteCCategory(category: Category){
+    fun deleteCategory(category: Category){
         viewModelScope.launch {
 
             deleteCategoryUseCase(category)
@@ -104,7 +104,9 @@ class TaskViewModel @Inject constructor(
     fun saveTask(
         title: String,
         description: String,
-        priority: Priority
+        priority: Priority,
+        categoryId: String?,
+        dueDate: Long?
     ) {
 
         val task = Task(
@@ -112,8 +114,9 @@ class TaskViewModel @Inject constructor(
             title = title,
             description = description,
             priority = priority,
-            dueDate = null,
+            dueDate = dueDate,
             isCompleted = false,
+            categoryId = categoryId,
             createdAt = System.currentTimeMillis(),
             updatedAt = System.currentTimeMillis()
         )
@@ -121,7 +124,6 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch {
             addTaskUseCase(task)
         }
-
     }
 
     fun updateTask(task: Task) {
@@ -136,18 +138,21 @@ class TaskViewModel @Inject constructor(
         oldTask: Task,
         title: String,
         description: String,
-        priority: Priority
+        priority: Priority,
+        categoryId: String?,
+        dueDate: Long?
     ) {
 
         val updatedTask = oldTask.copy(
             title = title,
             description = description,
             priority = priority,
+            categoryId = categoryId,
+            dueDate = dueDate,
             updatedAt = System.currentTimeMillis()
         )
 
         updateTask(updatedTask)
-
     }
 
     fun deleteTask(task: Task) {
