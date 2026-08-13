@@ -7,6 +7,12 @@ sealed class AppDestination(val route: String) {
     data object ForgotPassword : AppDestination("forgot_password")
     data object Home : AppDestination("home")
     data object Task : AppDestination("task")
+    data object AddTask : AppDestination("add_task")
+    data object EditTask : AppDestination("edit_task/{taskId}") {
+        fun createRoute(taskId: String): String {
+            return "edit_task/$taskId"
+        }
+    }
     data object Calendar : AppDestination("calendar")
     data object Stats : AppDestination("stats")
     data object Profile : AppDestination("profile")

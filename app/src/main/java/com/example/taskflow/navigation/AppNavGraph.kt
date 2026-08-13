@@ -1,9 +1,15 @@
 package com.example.taskflow.navigation
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.taskflow.presentation.auth.forgotpassword.ForgotPasswordScreen
 import com.example.taskflow.presentation.auth.login.LoginScreen
@@ -11,82 +17,218 @@ import com.example.taskflow.presentation.auth.register.RegisterScreen
 import com.example.taskflow.presentation.auth.splash.SplashScreen
 import com.example.taskflow.presentation.home.HomeScreen
 import com.example.taskflow.presentation.tasks.TaskScreen
+import com.example.taskflow.presentation.tasks.TaskViewModel
+import com.example.taskflow.presentation.tasks.addEditTaskScreen
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = AppDestination.Splash.route
+    startDestination: String = AppDestination.Splash.route,
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
-        // Splash Destination
-        composable(AppDestination.Splash.route) {
-            SplashScreen(
-                onNavigateToHome = {
-                    navController.navigate(AppDestination.Home.route) {
-                        popUpTo(AppDestination.Splash.route) { inclusive = true }
+
+    val navBackStackEntry by
+    navController.currentBackStackEntryAsState()
+
+    val currentRoute =
+        navBackStackEntry?.destination?.route
+
+    // These are the screens where bottom navigation
+    // should be visible.
+    val bottomNavRoutes = setOf(
+
+        AppDestination.Home.route,
+
+        AppDestination.Task.route,
+
+        AppDestination.Calendar.route,
+
+        AppDestination.Stats.route,
+
+        AppDestination.Profile.route
+
+    )
+
+    val showBottomBar =
+        currentRoute in bottomNavRoutes
+
+    Scaffold(
+
+        bottomBar = {
+
+            if (showBottomBar) {
+
+                BottomBar (
+
+                    currentRoute = currentRoute,
+
+                    onItemClick = { item ->
+
+                        if (currentRoute != item.route) {
+
+                            navController.navigate(
+                                item.route
+                            ) {
+
+                                popUpTo(
+                                    AppDestination.Home.route
+                                ) {
+
+                                    saveState = true
+
+                                }
+
+                                launchSingleTop = true
+
+                                restoreState = true
+
+                            }
+
+                        }
+
                     }
-                },
-                onNavigateToLogin = {
-                    navController.navigate(AppDestination.Login.route) {
-                        popUpTo(AppDestination.Splash.route) { inclusive = true }
-                    }
-                }
-            )
+
+                )
+
+            }
+
         }
 
-        // Login Destination
-        composable(AppDestination.Login.route) {
-            LoginScreen(
-                onNavigateToHome = {
-                    navController.navigate(AppDestination.Home.route) {
-                        popUpTo(AppDestination.Login.route) { inclusive = true }
+    ) { paddingValues ->
+
+        NavHost(
+
+            navController = navController,
+
+            startDestination = startDestination,
+
+            modifier = androidx.compose.ui.Modifier
+                .padding(paddingValues)
+            ) {
+
+            // Splash Destination
+            composable(AppDestination.Splash.route) {
+                SplashScreen(
+                    onNavigateToHome = {
+                        navController.navigate(AppDestination.Home.route) {
+                            popUpTo(AppDestination.Splash.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToLogin = {
+                        navController.navigate(AppDestination.Login.route) {
+                            popUpTo(AppDestination.Splash.route) { inclusive = true }
+                        }
                     }
-                },
-                onNavigateToRegister = {
-                    navController.navigate(AppDestination.Register.route)
-                },
-                onNavigateToForgotPassword = {
-                    navController.navigate(AppDestination.ForgotPassword.route)
-                }
-            )
-        }
+                )
+            }
 
-        // Register Destination
-        composable(AppDestination.Register.route) {
-            RegisterScreen(
-                onNavigateToLogin = {
-                    navController.popBackStack()
-                },
-                onNavigateToHome = {
-                    navController.navigate(AppDestination.Home.route) {
-                        popUpTo(AppDestination.Login.route) { inclusive = true }
+
+            // Login Destination
+            composable(AppDestination.Login.route) {
+                LoginScreen(
+                    onNavigateToHome = {
+                        navController.navigate(AppDestination.Home.route) {
+                            popUpTo(AppDestination.Login.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate(AppDestination.Register.route)
+                    },
+                    onNavigateToForgotPassword = {
+                        navController.navigate(AppDestination.ForgotPassword.route)
                     }
-                }
-            )
-        }
+                )
+            }
 
-        // Forgot Password Destination
-        composable(AppDestination.ForgotPassword.route) {
-            ForgotPasswordScreen(
-                onNavigateToLogin = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        // Home Destination
-        composable(AppDestination.Home.route) {
-            HomeScreen(
-                onNavigateToLogin = {
-                    navController.navigate(AppDestination.Login.route) {
-                        popUpTo(0) { inclusive = true }
+            // Register Destination
+            composable(AppDestination.Register.route) {
+                RegisterScreen(
+                    onNavigateToLogin = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToHome = {
+                        navController.navigate(AppDestination.Home.route) {
+                            popUpTo(AppDestination.Login.route) { inclusive = true }
+                        }
                     }
-                }
-            )
-        }
+                )
+            }
 
+            // Forgot Password Destination
+            composable(AppDestination.ForgotPassword.route) {
+                ForgotPasswordScreen(
+                    onNavigateToLogin = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            // Home Destination
+            composable(AppDestination.Home.route) {
+                HomeScreen(
+                    onNavigateToLogin = {
+                        navController.navigate(AppDestination.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            // Task Destination
+            composable(AppDestination.Task.route) {
+                TaskScreen(
+                    onAddTask = {
+                        navController.navigate(AppDestination.AddTask.route)
+                    },
+                    onTaskClick = { task ->
+                        navController.navigate(
+                            AppDestination.EditTask.createRoute(task.id)
+                        )
+                    }
+                )
+            }
+
+            //add Task
+            composable(AppDestination.AddTask.route) {
+                addEditTaskScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            //edit Task
+            composable(
+                route = AppDestination.EditTask.route
+            ) { backStackEntry ->
+
+                val taskId =
+                    backStackEntry.arguments?.getString("taskId")
+
+                val viewModel: TaskViewModel = hiltViewModel()
+
+                val state by viewModel.uiState.collectAsState()
+
+                val task =
+                    state.tasks.find {
+                        it.id == taskId
+                    }
+
+                if (task != null) {
+
+                    addEditTaskScreen(
+
+                        task = task,
+
+                        onBack = {
+                            navController.popBackStack()
+                        }
+
+                    )
+
+                }
+
+            }
+        }
     }
 }
+

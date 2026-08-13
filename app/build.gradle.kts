@@ -7,6 +7,10 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+ksp {
+    arg("correctErrorTypes", "true")
+}
+
 android {
     namespace = "com.example.taskflow"
     compileSdk = 36
@@ -103,6 +107,8 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("androidx.compose.material:material-icons-extended")
 
 
 }
