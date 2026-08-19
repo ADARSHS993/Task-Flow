@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,7 +38,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.taskflow.domain.model.Category
 import com.example.taskflow.domain.model.Priority
 import com.example.taskflow.domain.model.Task
-import com.example.taskflow.presentation.home.TaskItem
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -61,6 +61,7 @@ fun TaskScreen(
         containerColor = Color(0xFFF8F8FC),
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(0, 0, 0, 0),
                 title = {
 
                     Text(
@@ -97,7 +98,7 @@ fun TaskScreen(
         floatingActionButton = {
 
             FloatingActionButton(
-                onClick = { onTaskClick },
+                onClick = { onAddTask() },
                 containerColor = Color(0xFFF8F8FC),
                 contentColor = Color.White,
                 shape = RoundedCornerShape(16.dp)
@@ -254,7 +255,19 @@ fun TaskScreen(
 
                     items(items = filteredTasks, key = { it.id }) { task ->
 
-
+                        TaskItem(
+                            task = task,
+                            categories = state.categories,
+                            onClick = {
+                                onTaskClick(task)
+                            },
+                            onCheckedChange = {
+                                viewModel.toggleTask(task)
+                            },
+                            onDelete = {
+                                viewModel.deleteTask(task)
+                            }
+                        )
                     }
                 }
             }

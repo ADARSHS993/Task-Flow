@@ -16,6 +16,7 @@ import com.example.taskflow.presentation.auth.login.LoginScreen
 import com.example.taskflow.presentation.auth.register.RegisterScreen
 import com.example.taskflow.presentation.auth.splash.SplashScreen
 import com.example.taskflow.presentation.home.HomeScreen
+import com.example.taskflow.presentation.profile.ProfileScreen
 import com.example.taskflow.presentation.tasks.TaskScreen
 import com.example.taskflow.presentation.tasks.TaskViewModel
 import com.example.taskflow.presentation.tasks.addEditTaskScreen
@@ -227,6 +228,22 @@ fun AppNavGraph(
 
                 }
 
+            }
+
+            composable(
+                route = AppDestination.Profile.route
+            ){
+                ProfileScreen(
+                    onLogout = {
+                        navController.navigate(
+                            AppDestination.Login.route
+                        ){
+                            popUpTo(0){
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
             }
         }
     }

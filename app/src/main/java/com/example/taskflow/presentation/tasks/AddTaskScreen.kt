@@ -541,7 +541,7 @@ fun addEditTaskScreen(
 
             //DELETE CATEGORY DIALOG
 
-            if(showAddCategoryDialog){
+            if(showDeleteCategoryDialog){
                 AlertDialog(
 
                     onDismissRequest = {
