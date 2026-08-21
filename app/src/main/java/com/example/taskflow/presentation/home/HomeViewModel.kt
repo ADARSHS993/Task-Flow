@@ -1,88 +1,179 @@
 package com.example.taskflow.presentation.home
 
 import androidx.lifecycle.ViewModel
-import com.example.taskflow.domain.repository.AuthRepository
+import androidx.lifecycle.viewModelScope
+import com.example.taskflow.domain.model.Project
+import com.example.taskflow.domain.model.Task
+import com.example.taskflow.domain.usecase.projects.AddProjectUseCase
+import com.example.taskflow.domain.usecase.projects.DeleteProjectUseCase
+import com.example.taskflow.domain.usecase.projects.GetProjectByIdUseCase
+import com.example.taskflow.domain.usecase.projects.GetRecentProjectUseCase
+import com.example.taskflow.domain.usecase.projects.UpdateProjectUseCase
+import com.example.taskflow.domain.usecase.task.GetAllTasksUSeCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val authRepository: AuthRepository
-) : ViewModel() {
+    private val getAllTasksUseCase : GetAllTasksUSeCase,
+    private val getRecentProjectUseCase :  GetRecentProjectUseCase,
+    private val addProjectUseCase: AddProjectUseCase,
+    private val updateProjectUseCase: UpdateProjectUseCase,
+    private val getProjectByIdUseCase: GetProjectByIdUseCase,
+    private val deleteProjectUseCase : DeleteProjectUseCase
+) : ViewModel(){
 
     private val _uiState = MutableStateFlow(HomeUiState())
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    val uiState = _uiState.asStateFlow()
 
     init {
-        loadDashboardData()
+        observeHomeData()
     }
 
-    private fun loadDashboardData() {
-        val user = authRepository.currentUser
-        val displayName = user?.displayName?.ifBlank { null } ?: user?.email?.substringBefore("@") ?: "Alex"
+    private fun observeHomeData(){
 
-        val initialTasks = listOf(
-            TaskItem(
-                id = "1",
-                title = "Finalize Q4 Strategy",
-                category = "Work",
-                time = "09:00 AM",
-                isCompleted = true
-            ),
-            TaskItem(
-                id = "2",
-                title = "Review design tokens",
-                category = "Product",
-                time = "",
-                isCompleted = false,
-                isHighPriority = true
-            ),
-            TaskItem(
-                id = "3",
-                title = "Client meeting: TaskFlow update",
-                category = "Meeting",
-                time = "02:30 PM",
-                isCompleted = false
-            )
-        )
-
-        val initialProjects = listOf(
-            ProjectItem(id = "p1", name = "Mobile App", taskCount = 88, iconType = "folder"),
-            ProjectItem(id = "p2", name = "AI Engine", taskCount = 12, iconType = "sparkles")
-        )
-
-        _uiState.update {
-            it.copy(
-                userName = displayName,
-                todayTasks = initialTasks,
-                recentProjects = initialProjects
-            )
-        }
-    }
-
-    fun toggleTaskCompletion(taskId: String) {
-        _uiState.update { state ->
-            val updatedTasks = state.todayTasks.map { task ->
-                if (task.id == taskId) task.copy(isCompleted = !task.isCompleted) else task
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null
+                )
             }
-            val completedCount = updatedTasks.count { it.isCompleted }
-            val total = updatedTasks.size
-            val percentage = if (total > 0) (completedCount * 100) / total else 0
-            state.copy(
-                todayTasks = updatedTasks,
-                completedTaskCount = completedCount,
-                totalTaskCount = total,
-                progressPercentage = percentage
-            )
+
+            combine(
+                getAllTasksUseCase(),
+                getRecentProjectUseCase()
+            ){tasks, projects ->
+
+                createHomeState(
+                    tasks = tasks,
+                    projects = projects
+                )
+            }.collect { state ->
+                _uiState.value = state
+            }
         }
     }
 
-    fun logout() {
-        authRepository.logout()
-        _uiState.update { it.copy(isLoggedOut = true) }
+    private fun createHomeState(
+        tasks: List<Task>,
+        projects: List<Project>
+    ): HomeUiState{
+        var totalTasks = tasks.size
+
+        val completedTasks = tasks.count{
+            it.isCompleted
+        }
+
+        val progressPercentage =
+            if(totalTasks == 0){
+                0
+            }else{
+                (completedTasks * 100) / totalTasks
+            }
+
+        val todayTasks = getTodayTasks(tasks)
+
+        return HomeUiState(
+            tasks = tasks,
+            todayTasks = todayTasks,
+            recentProjects = projects,
+            completedTasks = completedTasks,
+            totalTasks = totalTasks,
+            progressPercentage = progressPercentage,
+            isLoading = false,
+            error = null
+        )
+    }
+
+    private fun getTodayTasks(
+        tasks: List<Task>
+    ): List<Task>{
+        val today = LocalDate.now()
+
+        return tasks.filter { task ->
+
+            task.dueDate?.let { dueDate ->
+
+                val taskDate =
+                    Instant.ofEpochMilli(dueDate)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+
+                taskDate == today
+            } ?: false
+        }
+
+        fun refresh(){
+            observeHomeData()
+        }
+    }
+
+    //Add Project
+    fun addProject(
+        project: Project
+    ){
+        viewModelScope.launch {
+
+            try {
+                addProjectUseCase(project)
+            }
+
+            catch (e: Exception){
+
+                _uiState.update {
+                    it.copy(
+                        error = e.message
+                    )
+                }
+            }
+        }
+    }
+
+    //Update Project
+
+    fun updateProject(
+        project: Project
+    ){
+
+        viewModelScope.launch {
+
+            try {
+                updateProjectUseCase(project)
+            } catch (e: Exception){
+
+                _uiState.update {
+                    it.copy(
+                        error = e.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun deleteProject(
+        project: Project
+    ){
+
+        viewModelScope.launch {
+            try {
+                deleteProjectUseCase(project)
+            } catch (e : Exception){
+
+                _uiState.update {
+                    it.copy(
+                        error = e.message
+                    )
+                }
+            }
+        }
     }
 }

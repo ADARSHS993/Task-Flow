@@ -1,8 +1,10 @@
 package com.example.taskflow.data.di
 
 import com.example.taskflow.data.repository.ProfileRepositoryImpl
+import com.example.taskflow.data.repository.ProjectRepositoryImpl
 import com.example.taskflow.data.repository.TaskRepositoryImpl
 import com.example.taskflow.domain.repository.ProfileRepository
+import com.example.taskflow.domain.repository.ProjectRepository
 import com.example.taskflow.domain.repository.TaskRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.Binds
@@ -28,4 +30,9 @@ abstract class RepositoryModule {
         impl : ProfileRepositoryImpl
     ): ProfileRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindProjectRepository(
+        repositoryImpl: ProjectRepositoryImpl
+    ): ProjectRepository
 }

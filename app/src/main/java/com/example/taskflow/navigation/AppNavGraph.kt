@@ -5,6 +5,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -15,7 +16,9 @@ import com.example.taskflow.presentation.auth.forgotpassword.ForgotPasswordScree
 import com.example.taskflow.presentation.auth.login.LoginScreen
 import com.example.taskflow.presentation.auth.register.RegisterScreen
 import com.example.taskflow.presentation.auth.splash.SplashScreen
+import com.example.taskflow.presentation.home.AddEditProjectScreen
 import com.example.taskflow.presentation.home.HomeScreen
+import com.example.taskflow.presentation.home.HomeViewModel
 import com.example.taskflow.presentation.profile.ProfileScreen
 import com.example.taskflow.presentation.tasks.TaskScreen
 import com.example.taskflow.presentation.tasks.TaskViewModel
@@ -102,7 +105,7 @@ fun AppNavGraph(
 
             startDestination = startDestination,
 
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .padding(paddingValues)
             ) {
 
@@ -166,10 +169,48 @@ fun AppNavGraph(
             // Home Destination
             composable(AppDestination.Home.route) {
                 HomeScreen(
+                    onAddProject = {
+                        navController.navigate(
+                            AppDestination.AddProject.route
+                        )
+                    },
+                    onProjectClick = {project ->
+                        navController.navigate(
+                            AppDestination.EditProject.createRoutr(
+                                project.id
+                            )
+                        )
+                    },
+                    onTaskClick = { task ->
+                        navController.navigate(
+                            AppDestination.EditTask.createRoute(
+                                task.id
+                            )
+                        )
+                    },
                     onNavigateToLogin = {
-                        navController.navigate(AppDestination.Login.route) {
-                            popUpTo(0) { inclusive = true }
+                        navController.navigate(
+                            AppDestination.Login.route
+                        ) {
+                            popUpTo(0) {
+                                inclusive = true
+                            }
                         }
+                    }
+                )
+            }
+
+            //AddProject
+            composable(AppDestination.AddProject.route){
+                val viewModel : HomeViewModel = hiltViewModel()
+
+                AddEditProjectScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onSave = {project ->
+                        viewModel.addProject(project)
+                        navController.popBackStack()
                     }
                 )
             }

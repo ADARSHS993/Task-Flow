@@ -3,8 +3,9 @@ package com.example.taskflow.domain.usecase.projects
 import com.example.taskflow.domain.repository.ProjectRepository
 import javax.inject.Inject
 
-class GetAllProjectsUseCase @Inject constructor(
+class GetProjectByIdUseCase @Inject constructor(
     private val repository: ProjectRepository
 ) {
-    operator fun invoke() = repository.getAllProjects()
+    suspend operator fun invoke(projectId: String) =
+        repository.getProjectById(projectId)
 }
