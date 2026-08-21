@@ -231,10 +231,14 @@ fun AppNavGraph(
 
             //add Task
             composable(AppDestination.AddTask.route) {
+                val viewModel: TaskViewModel = hiltViewModel()
+                val state by viewModel.uiState.collectAsState()
+
                 addEditTaskScreen(
                     onBack = {
                         navController.popBackStack()
-                    }
+                    },
+                    projects = state.projects
                 )
             }
 
@@ -261,10 +265,11 @@ fun AppNavGraph(
 
                         task = task,
 
+                        projects = state.projects,
+
                         onBack = {
                             navController.popBackStack()
                         }
-
                     )
 
                 }

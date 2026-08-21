@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.taskflow.domain.model.Category
 import com.example.taskflow.domain.model.Priority
 import com.example.taskflow.domain.model.Task
+import com.example.taskflow.domain.usecase.projects.GetAllProjectsUseCase
 import com.example.taskflow.domain.usecase.task.AddCategoryUseCase
 import com.example.taskflow.domain.usecase.task.AddTaskUseCase
 import com.example.taskflow.domain.usecase.task.DeleteCategoryUsecase
@@ -31,7 +32,9 @@ class TaskViewModel @Inject constructor(
 
     private val getCategoryUseCase : GetCategoryUseCase,
     private val addCategoryUseCase : AddCategoryUseCase,
-    private val deleteCategoryUseCase : DeleteCategoryUsecase
+    private val deleteCategoryUseCase : DeleteCategoryUsecase,
+
+    private val getAllProjectsUseCase : GetAllProjectsUseCase
 
 
     ) : ViewModel() {
@@ -42,6 +45,21 @@ class TaskViewModel @Inject constructor(
     init {
         getAllTasks()
         getAllCategories()
+        getAllProjects()
+    }
+
+    private fun getAllProjects(){
+        viewModelScope.launch {
+
+            getAllProjectsUseCase().collect { projects ->
+
+                _uiState.update {
+                    it.copy(
+                        projects = projects
+                    )
+                }
+            }
+        }
     }
 
     private fun getAllCategories() {
@@ -106,7 +124,8 @@ class TaskViewModel @Inject constructor(
         description: String,
         priority: Priority,
         categoryId: String?,
-        dueDate: Long?
+        dueDate: Long?,
+        projectId: String?
     ) {
 
         val task = Task(
@@ -115,6 +134,7 @@ class TaskViewModel @Inject constructor(
             description = description,
             priority = priority,
             dueDate = dueDate,
+            projectId = projectId,
             isCompleted = false,
             categoryId = categoryId,
             createdAt = System.currentTimeMillis(),
@@ -140,7 +160,8 @@ class TaskViewModel @Inject constructor(
         description: String,
         priority: Priority,
         categoryId: String?,
-        dueDate: Long?
+        dueDate: Long?,
+        projectId: String?
     ) {
 
         val updatedTask = oldTask.copy(
@@ -149,6 +170,7 @@ class TaskViewModel @Inject constructor(
             priority = priority,
             categoryId = categoryId,
             dueDate = dueDate,
+            projectId = projectId,
             updatedAt = System.currentTimeMillis()
         )
 

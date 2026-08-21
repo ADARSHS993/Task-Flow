@@ -25,12 +25,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.taskflow.domain.model.Category
 import com.example.taskflow.domain.model.Priority
+import com.example.taskflow.domain.model.Project
 import com.example.taskflow.domain.model.Task
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -42,6 +44,8 @@ fun addEditTaskScreen(
     task: Task? = null,
 
     onBack: () -> Unit,
+
+    projects: List<Project>,
 
     viewModel: TaskViewModel = hiltViewModel(),
 ) {
@@ -63,6 +67,12 @@ fun addEditTaskScreen(
             state.categories.find {
                 it.id == task?.categoryId
             }
+        )
+    }
+
+    var selectedProjectId by remember {
+        mutableStateOf(
+            task?.projectId
         )
     }
 
@@ -207,6 +217,7 @@ fun addEditTaskScreen(
 
                     Column(modifier = Modifier.fillMaxWidth()) {
 
+                        //Prority
                         Text(
                             text = "Priority",
                             style = MaterialTheme.typography.titleMedium,
@@ -241,6 +252,17 @@ fun addEditTaskScreen(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    //Project DropDown
+                    ProjectDropdown(
+                        projects = projects,
+                        selectedProjectId = selectedProjectId,
+                        onProjectSelected = {
+                            selectedProjectId = it
+                        }
+                    )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -424,7 +446,8 @@ fun addEditTaskScreen(
                                     description = description.trim(),
                                     priority = priority,
                                     categoryId = selectedCategory?.id,
-                                    dueDate = dueDate
+                                    dueDate = dueDate,
+                                    projectId = selectedProjectId
                                 )
                             } else {
                                 viewModel.editTask(
@@ -433,7 +456,8 @@ fun addEditTaskScreen(
                                     description = description.trim(),
                                     priority = priority,
                                     categoryId = selectedCategory?.id,
-                                    dueDate = dueDate
+                                    dueDate = dueDate,
+                                    projectId = selectedProjectId
                                 )
                             }
                             onBack()
@@ -621,6 +645,120 @@ fun addEditTaskScreen(
                 ) {
                     DatePicker(
                         state = datePickerState
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProjectDropdown(
+    projects: List<Project>,
+    selectedProjectId: String?,
+    onProjectSelected: (String?) -> Unit
+) {
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
+    val selectedProject = projects.find {
+        it.id == selectedProjectId
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+
+        Text(
+            text = "Project",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(
+                start = 4.dp,
+                bottom = 10.dp
+            )
+        )
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                expanded = !expanded
+            }
+        ) {
+
+            OutlinedTextField(
+
+                value = selectedProject?.name ?: "No Project",
+
+                onValueChange = {},
+
+                readOnly = true,
+
+                label = {
+                    Text("Select Project")
+                },
+
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = expanded
+                    )
+                },
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
+
+                shape = RoundedCornerShape(16.dp),
+
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White
+                )
+            )
+
+            ExposedDropdownMenu(
+
+                expanded = expanded,
+
+                onDismissRequest = {
+                    expanded = false
+                }
+            ) {
+
+                // No Project option
+
+                DropdownMenuItem(
+
+                    text = {
+                        Text("No Project")
+                    },
+
+                    onClick = {
+
+                        onProjectSelected(null)
+
+                        expanded = false
+                    }
+                )
+
+                projects.forEach { project ->
+
+                    DropdownMenuItem(
+
+                        text = {
+                            Text(project.name)
+                        },
+
+                        onClick = {
+
+                            onProjectSelected(
+                                project.id
+                            )
+
+                            expanded = false
+                        }
                     )
                 }
             }
