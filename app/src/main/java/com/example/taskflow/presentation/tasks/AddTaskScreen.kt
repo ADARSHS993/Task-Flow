@@ -41,6 +41,8 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun addEditTaskScreen(
+    initialProjectId: String? = null,
+
     task: Task? = null,
 
     onBack: () -> Unit,
@@ -72,7 +74,7 @@ fun addEditTaskScreen(
 
     var selectedProjectId by remember {
         mutableStateOf(
-            task?.projectId
+            task?.projectId ?: initialProjectId
         )
     }
 
@@ -256,13 +258,37 @@ fun addEditTaskScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     //Project DropDown
-                    ProjectDropdown(
-                        projects = projects,
-                        selectedProjectId = selectedProjectId,
-                        onProjectSelected = {
-                            selectedProjectId = it
+                    if (initialProjectId != null) {
+
+                        val selectedProject = projects.find {
+                            it.id == initialProjectId
                         }
-                    )
+
+                        if (selectedProject != null) {
+
+                            OutlinedTextField(
+                                value = selectedProject.name,
+                                onValueChange = {},
+                                readOnly = true,
+                                enabled = false,
+                                label = {
+                                    Text("Project")
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                        }
+
+                    } else {
+
+                        ProjectDropdown(
+                            projects = projects,
+                            selectedProjectId = selectedProjectId,
+                            onProjectSelected = { projectId ->
+                                selectedProjectId = projectId
+                            }
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(24.dp))
 

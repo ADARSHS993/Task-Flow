@@ -12,10 +12,12 @@ import com.example.taskflow.domain.usecase.task.DeleteCategoryUsecase
 import com.example.taskflow.domain.usecase.task.DeleteTaskUseCase
 import com.example.taskflow.domain.usecase.task.GetAllTasksUSeCase
 import com.example.taskflow.domain.usecase.task.GetCategoryUseCase
+import com.example.taskflow.domain.usecase.task.GetTasksByProjectUseCase
 import com.example.taskflow.domain.usecase.task.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,6 +28,7 @@ import javax.inject.Inject
 class TaskViewModel @Inject constructor(
 
     private val getAllTasksUseCase: GetAllTasksUSeCase,
+    private val getTasksByProjectUseCase : GetTasksByProjectUseCase,
     private val addTaskUseCase: AddTaskUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
@@ -35,8 +38,6 @@ class TaskViewModel @Inject constructor(
     private val deleteCategoryUseCase : DeleteCategoryUsecase,
 
     private val getAllProjectsUseCase : GetAllProjectsUseCase
-
-
     ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TaskUiState())
@@ -56,6 +57,19 @@ class TaskViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         projects = projects
+                    )
+                }
+            }
+        }
+    }
+
+    fun getTasksByProject(projectId: String){
+        viewModelScope.launch {
+            getTasksByProjectUseCase(projectId).collect{ tasks ->
+                _uiState.update {
+                    it.copy(
+                        tasks = tasks,
+                        isLoading = false
                     )
                 }
             }
@@ -95,7 +109,7 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    private fun getAllTasks() {
+    fun getAllTasks() {
 
         viewModelScope.launch {
 

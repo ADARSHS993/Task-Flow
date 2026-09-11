@@ -3,6 +3,7 @@ package com.example.taskflow.di
 import android.content.Context
 import androidx.room.Room
 import com.example.taskflow.data.local.dao.CategoryDao
+import com.example.taskflow.data.local.dao.ProjectDao
 import com.example.taskflow.data.local.dao.TaskDao
 import com.example.taskflow.data.local.database.TaskFlowDatabase
 import com.example.taskflow.data.repository.TaskRepositoryImpl
@@ -45,5 +46,13 @@ object DatabaseModule {
         database: TaskFlowDatabase
     ): CategoryDao{
         return database.categoryDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideProjectDao(
+        database: TaskFlowDatabase
+    ): ProjectDao {
+        return database.projectDao()
     }
 }

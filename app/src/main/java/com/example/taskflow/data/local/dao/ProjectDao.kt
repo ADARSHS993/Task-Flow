@@ -3,6 +3,7 @@ package com.example.taskflow.data.local.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.taskflow.data.local.entity.ProjectEntity
@@ -20,7 +21,7 @@ interface ProjectDao {
     @Insert
     suspend fun insertProject(project: ProjectEntity)
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateProject(project: ProjectEntity)
 
     @Delete

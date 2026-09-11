@@ -7,7 +7,7 @@ data class Task(
     val priority: Priority,
     val dueDate: Long?,
     val isCompleted: Boolean = false,
-    val projectId: String? = null,
+    val projectId: String?,
     val categoryId: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()

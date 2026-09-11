@@ -176,7 +176,7 @@ fun AppNavGraph(
                     },
                     onProjectClick = {project ->
                         navController.navigate(
-                            AppDestination.EditProject.createRoutr(
+                            AppDestination.ProjectTasks.createRoute(
                                 project.id
                             )
                         )
@@ -229,16 +229,60 @@ fun AppNavGraph(
                 )
             }
 
+                //project task
+
+            composable(
+                AppDestination.ProjectTasks.route
+            ) { backStackEntry ->
+
+                val projectId =
+                    backStackEntry.arguments?.getString("projectId")
+
+                TaskScreen(
+                    projectId = projectId,
+
+                    onAddTask = {
+                        navController.navigate(
+                            AppDestination.AddTask.createRoute(projectId)
+                        )
+                    },
+
+                    onTaskClick = { task ->
+                        navController.navigate(
+                            AppDestination.EditTask.createRoute(task.id)
+                        )
+                    }
+                )
+            }
             //add Task
-            composable(AppDestination.AddTask.route) {
+            // Add Task
+            composable(
+                route = AppDestination.AddTask.route
+            ) { backStackEntry ->
+
+                val projectIdArg =
+                    backStackEntry.arguments?.getString("projectId")
+
+                val projectId =
+                    if (projectIdArg == "none") {
+                        null
+                    } else {
+                        projectIdArg
+                    }
+
                 val viewModel: TaskViewModel = hiltViewModel()
                 val state by viewModel.uiState.collectAsState()
 
                 addEditTaskScreen(
+                    projects = state.projects,
+
+                    initialProjectId = projectId,
+
                     onBack = {
                         navController.popBackStack()
                     },
-                    projects = state.projects
+
+                    viewModel = viewModel
                 )
             }
 

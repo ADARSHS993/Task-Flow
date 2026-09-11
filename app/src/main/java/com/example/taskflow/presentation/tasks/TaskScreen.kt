@@ -46,6 +46,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskScreen(
+    projectId : String? = null,
     viewModel: TaskViewModel = hiltViewModel(),
     onAddTask: () -> Unit,
     onTaskClick: (Task) -> Unit,
@@ -53,9 +54,17 @@ fun TaskScreen(
 
     val state by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(projectId) {
+        if(projectId == null){
+            viewModel.getAllTasks()
+        }else{
+            viewModel.getTasksByProject(projectId)
+        }
+    }
     var selectedFilter by remember {
         mutableStateOf("All")
     }
+
 
     Scaffold(
         containerColor = Color(0xFFF8F8FC),
@@ -210,11 +219,8 @@ fun TaskScreen(
                 .filter {
                     when (selectedFilter) {
                         "High" -> it.priority == Priority.HIGH
-
                         "Medium" -> it.priority == Priority.MEDIUM
-
                         "Low" -> it.priority == Priority.LOW
-
                         else -> true
                     }
                 }
@@ -253,7 +259,8 @@ fun TaskScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
-                    items(items = filteredTasks, key = { it.id }) { task ->
+                    items(items = state.tasks,
+                        key = {task -> task.id}) { task ->
 
                         TaskItem(
                             task = task,

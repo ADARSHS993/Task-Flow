@@ -24,6 +24,13 @@ class TaskRepositoryImpl @Inject constructor(
         }
         }
 
+    override fun getTaskByProject(projectId: String): Flow<List<Task>> {
+        return dao.getTasksByProject(projectId)
+            .map { entities ->
+                entities.map { it.toDomain() }
+            }
+    }
+
 
     override suspend fun getTaskById(id: String): Task? {
         return dao.getTaskById(id)?.toDomain()

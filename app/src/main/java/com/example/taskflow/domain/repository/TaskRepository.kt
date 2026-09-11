@@ -8,6 +8,8 @@ interface TaskRepository {
 
     fun getAllTasks(): Flow<List<Task>>
 
+    fun getTaskByProject(projectId: String): Flow<List<Task>>
+
     suspend fun getTaskById(id: String): Task?
 
     suspend fun insertTask(task: Task)

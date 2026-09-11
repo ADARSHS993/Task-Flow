@@ -15,8 +15,25 @@ sealed class AppDestination(val route: String) {
         }
     }
 
-    data object Task : AppDestination("task")
-    data object AddTask : AppDestination("add_task")
+    data object Task : AppDestination("task/{projectId}") {
+
+        fun createRoute(projectId: String): String {
+            return "task/$projectId"
+        }
+    }
+
+    data object ProjectTasks : AppDestination("project_tasks/{projectId}") {
+
+        fun createRoute(projectId: String): String {
+            return "project_tasks/$projectId"
+        }
+    }
+    data object AddTask : AppDestination("add_task/{projectId}") {
+
+        fun createRoute(projectId: String?): String {
+            return "add_task/${projectId ?: "none"}"
+        }
+    }
     data object EditTask : AppDestination("edit_task/{taskId}") {
         fun createRoute(taskId: String): String {
             return "edit_task/$taskId"
