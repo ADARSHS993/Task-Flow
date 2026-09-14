@@ -29,7 +29,9 @@ object DatabaseModule {
             context,
             TaskFlowDatabase::class.java,
             "taskflow_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides

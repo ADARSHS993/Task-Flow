@@ -15,7 +15,7 @@ import com.example.taskflow.data.local.entity.TaskEntity
         CategoryEntity::class,
         ProjectEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class TaskFlowDatabase : RoomDatabase() {
