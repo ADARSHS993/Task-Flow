@@ -16,6 +16,7 @@ import com.example.taskflow.presentation.auth.forgotpassword.ForgotPasswordScree
 import com.example.taskflow.presentation.auth.login.LoginScreen
 import com.example.taskflow.presentation.auth.register.RegisterScreen
 import com.example.taskflow.presentation.auth.splash.SplashScreen
+import com.example.taskflow.presentation.calendar.CalendarScreen
 import com.example.taskflow.presentation.home.AddEditProjectScreen
 import com.example.taskflow.presentation.home.HomeScreen
 import com.example.taskflow.presentation.home.HomeViewModel
@@ -332,6 +333,23 @@ fun AppNavGraph(
                                 inclusive = true
                             }
                         }
+                    }
+                )
+            }
+
+            composable(
+                AppDestination.Calendar.route
+            ){
+                CalendarScreen(
+                    onAddTask = {
+                        navController.navigate(
+                            AppDestination.AddTask.createRoute(null)
+                        )
+                    },
+                    onTaskClick = {task ->
+                        navController.navigate(
+                            AppDestination.EditTask.createRoute(task.id)
+                        )
                     }
                 )
             }
