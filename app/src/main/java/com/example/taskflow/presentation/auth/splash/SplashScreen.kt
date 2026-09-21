@@ -99,7 +99,7 @@ fun SplashScreen(
         }
 
         Text(
-            text = "© 2024 TaskFlow Ecosystem",
+            text = "©  2026 TaskFlow Ecosystem",
             fontSize = 12.sp,
             color = Color(0xFFA0A4B4),
             modifier = Modifier

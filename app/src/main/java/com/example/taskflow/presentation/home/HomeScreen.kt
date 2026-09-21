@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -82,33 +83,7 @@ fun HomeScreen(
         containerColor = Color(0xFFF8F8FC),
 
         topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(
-                        onClick = onMenuClick
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu"
-                        )
-                    }
-                },
-
-                title = {
-
-                    Text(
-                        text = "TaskFlow",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3324C8)
-                    )
-                },
-
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF8F8FC)
-                )
-
-            )
+           HomeTopBar()
         },
 
         floatingActionButton = {
@@ -342,6 +317,57 @@ fun HomeScreen(
                     )
                 }
             }
+        )
+    }
+}
+
+@Composable
+fun HomeTopBar() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        IconButton(
+            onClick = {}
+        ) {
+
+            Icon(imageVector = Icons.Default.Menu,
+                contentDescription = "Menu",
+                tint = Color.Black)
+        }
+
+        Text(
+            text = "TaskFlow",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF2F1FC6)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE0E0E0)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile",
+                    tint = Color.DarkGray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.width(6.dp)
         )
     }
 }

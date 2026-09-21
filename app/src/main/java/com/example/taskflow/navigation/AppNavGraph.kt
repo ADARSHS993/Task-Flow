@@ -21,6 +21,7 @@ import com.example.taskflow.presentation.home.AddEditProjectScreen
 import com.example.taskflow.presentation.home.HomeScreen
 import com.example.taskflow.presentation.home.HomeViewModel
 import com.example.taskflow.presentation.profile.ProfileScreen
+import com.example.taskflow.presentation.statistics.StatsScreen
 import com.example.taskflow.presentation.tasks.TaskScreen
 import com.example.taskflow.presentation.tasks.TaskViewModel
 import com.example.taskflow.presentation.tasks.addEditTaskScreen
@@ -352,6 +353,12 @@ fun AppNavGraph(
                         )
                     }
                 )
+            }
+
+            composable(
+                AppDestination.Stats.route
+            ){
+                StatsScreen()
             }
         }
     }

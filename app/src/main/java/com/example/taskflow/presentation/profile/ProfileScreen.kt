@@ -124,19 +124,17 @@ fun ProfileScreen(
 
                     Box(
                         modifier = Modifier
-                            .padding(end = 12.dp)
-                            .size(32.dp)
+                            .size(34.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFE3E5EF)),
+                            .background(Color(0xFFE0E0E0)),
+                        contentAlignment = Alignment.Center
                     ) {
-
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile",
-                            tint = Color(0xFF555555),
+                            tint = Color.DarkGray,
                             modifier = Modifier.size(20.dp)
                         )
-
                     }
 
                 },

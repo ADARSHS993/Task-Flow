@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -69,40 +70,7 @@ fun TaskScreen(
     Scaffold(
         containerColor = Color(0xFFF8F8FC),
         topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(0, 0, 0, 0),
-                title = {
-
-                    Text(
-                        text = "Tasks",
-                        color = Color(0xFF3520C9),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                        )
-                    }
-                },
-
-                actions = {
-                    IconButton(
-                        onClick = {}
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Profile"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF8F8FC)
-                )
-            )
+            TaskTopBar()
         },
         floatingActionButton = {
 
@@ -280,6 +248,58 @@ fun TaskScreen(
             }
         }
     }
+}
+
+@Composable
+fun TaskTopBar() {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+    IconButton(
+        onClick = {}
+    ) {
+
+        Icon(imageVector = Icons.Default.Menu,
+            contentDescription = "Menu",
+            tint = Color.Black)
+    }
+
+    Text(
+        text = "Tasks",
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Medium,
+        color = Color(0xFF2F1FC6)
+    )
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE0E0E0)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile",
+                    tint = Color.DarkGray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+    Spacer(
+        modifier = Modifier.width(6.dp)
+    )
+        }
 }
 
 
