@@ -18,7 +18,7 @@ interface ProjectDao {
     @Query(""" SELECT * FROM projects ORDER BY createAt DESC LIMIT 4""")
     fun getRecentProjects(): Flow<List<ProjectEntity>>
 
-    @Insert
+    @Insert (onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProject(project: ProjectEntity)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)

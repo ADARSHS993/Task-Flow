@@ -16,4 +16,6 @@ interface ProjectRepository {
     suspend fun deleteProject(project: Project)
 
     suspend fun getProjectById(projectId: String): Project?
+
+    suspend fun syncProjectFromFirestore()
 }

@@ -23,4 +23,8 @@ interface TaskRepository {
     suspend fun  insertCategory(category : Category)
 
     suspend fun  deleteCategory(category : Category)
+
+    suspend fun syncTasksFromFirestore()
+
+    suspend fun syncCategoriesFromFirestore()
 }

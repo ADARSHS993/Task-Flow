@@ -13,6 +13,9 @@ data class CategoryEntity(
 
     val color: String,
 
-    val icon: String
+    val icon: String,
 
+    val createAt: Long,
+
+    val updateAt: Long
 )

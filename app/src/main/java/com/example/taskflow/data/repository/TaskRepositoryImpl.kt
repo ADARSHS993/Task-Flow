@@ -4,6 +4,8 @@ import com.example.taskflow.data.local.dao.CategoryDao
 import com.example.taskflow.data.local.dao.TaskDao
 import com.example.taskflow.data.mapper.toDomain
 import com.example.taskflow.data.mapper.toEntity
+import com.example.taskflow.data.remote.firestore.FirestoreCategoryDataSource
+import com.example.taskflow.data.remote.firestore.FirestoreTaskDataSource
 import com.example.taskflow.domain.model.Category
 import com.example.taskflow.domain.model.Task
 import com.example.taskflow.domain.repository.TaskRepository
@@ -13,7 +15,9 @@ import javax.inject.Inject
 
 class TaskRepositoryImpl @Inject constructor(
     private val dao: TaskDao,
-    private val categoryDao : CategoryDao
+    private val categoryDao : CategoryDao,
+    private val firestoreCategoryDataSource: FirestoreCategoryDataSource,
+    private val firestoreTaskDataSource: FirestoreTaskDataSource
 ): TaskRepository {
     override fun getAllTasks(): Flow<List<Task>> {
 
@@ -37,15 +41,27 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertTask(task: Task) {
-        return dao.insertTask(task.toEntity())
+        dao.insertTask(
+            task.toEntity()
+        )
+
+        firestoreTaskDataSource.addTask(task)
     }
 
     override suspend fun updateTask(task: Task) {
-        return dao.updateTask(task.toEntity())
+        dao.updateTask(
+            task.toEntity()
+        )
+
+        firestoreTaskDataSource.updateTask(task)
     }
 
     override suspend fun deleteTask(task: Task) {
-        return dao.deleteTask(task.toEntity())
+         dao.deleteTask(
+             task.toEntity()
+         )
+
+        firestoreTaskDataSource.deleteTask(task.id)
     }
 
     override fun getCategories(): Flow<List<Category>> {
@@ -57,11 +73,45 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertCategory(category: Category) {
-         return categoryDao.insertCategory(category.toEntity())
+        categoryDao.insertCategory(
+            category.toEntity()
+        )
+
+        firestoreCategoryDataSource.addCategory(category)
     }
 
     override suspend fun deleteCategory(category: Category) {
-        return categoryDao.deleteCategory(category.toEntity())
+         categoryDao.deleteCategory(
+             category.toEntity()
+         )
+
+        firestoreCategoryDataSource.deleteCategory(
+            category.id
+        )
+    }
+
+    override suspend fun syncTasksFromFirestore() {
+        val tasks =
+            firestoreTaskDataSource.getTasks()
+
+        tasks.forEach { task ->
+
+            dao.insertTask(
+                task.toEntity()
+            )
+        }
+    }
+
+    override suspend fun syncCategoriesFromFirestore() {
+        val categories =
+            firestoreCategoryDataSource.getCategories()
+
+        categories.forEach { category ->
+
+            categoryDao.insertCategory(
+                category.toEntity()
+            )
+        }
     }
 
 

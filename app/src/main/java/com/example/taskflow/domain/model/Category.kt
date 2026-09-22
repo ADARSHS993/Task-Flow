@@ -5,7 +5,7 @@ data class Category(
 
     val name: String,
 
-    val color: String,
+    val createAt: Long,
 
-    val icon: String
+    val updateAt: Long
 )

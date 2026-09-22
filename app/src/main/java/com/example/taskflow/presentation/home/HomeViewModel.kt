@@ -9,6 +9,7 @@ import com.example.taskflow.domain.usecase.projects.DeleteProjectUseCase
 import com.example.taskflow.domain.usecase.projects.GetProjectByIdUseCase
 import com.example.taskflow.domain.usecase.projects.GetRecentProjectUseCase
 import com.example.taskflow.domain.usecase.projects.UpdateProjectUseCase
+import com.example.taskflow.domain.usecase.sync.SyncDataUseCase
 import com.example.taskflow.domain.usecase.task.GetAllTasksUSeCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,10 +24,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val syncDataUseCase: SyncDataUseCase,
+
     private val getAllTasksUseCase : GetAllTasksUSeCase,
     private val getRecentProjectUseCase :  GetRecentProjectUseCase,
     private val addProjectUseCase: AddProjectUseCase,
-    private val updateProjectUseCase: UpdateProjectUseCase,
     private val getProjectByIdUseCase: GetProjectByIdUseCase,
     private val deleteProjectUseCase : DeleteProjectUseCase
 ) : ViewModel(){
@@ -36,6 +38,16 @@ class HomeViewModel @Inject constructor(
 
     init {
         observeHomeData()
+        syncData()
+    }
+
+    private fun syncData() {
+        viewModelScope.launch {
+            try {
+                syncDataUseCase()
+            }catch (e: Exception){
+            }
+        }
     }
 
     private fun observeHomeData(){
@@ -128,27 +140,6 @@ class HomeViewModel @Inject constructor(
             }
 
             catch (e: Exception){
-
-                _uiState.update {
-                    it.copy(
-                        error = e.message
-                    )
-                }
-            }
-        }
-    }
-
-    //Update Project
-
-    fun updateProject(
-        project: Project
-    ){
-
-        viewModelScope.launch {
-
-            try {
-                updateProjectUseCase(project)
-            } catch (e: Exception){
 
                 _uiState.update {
                     it.copy(
