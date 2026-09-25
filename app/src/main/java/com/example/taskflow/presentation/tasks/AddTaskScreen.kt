@@ -36,6 +36,8 @@ import com.example.taskflow.domain.model.Project
 import com.example.taskflow.domain.model.Task
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
+import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,7 +107,7 @@ fun addEditTaskScreen(
     val dateFormatter = remember {
         SimpleDateFormat(
             "dd MMM yyyy",
-            java.util.Locale.getDefault()
+            Locale.getDefault()
         )
     }
 
@@ -554,13 +556,15 @@ fun addEditTaskScreen(
                     },
                     confirmButton = {
 
+                        val currentTime = System.currentTimeMillis()
+
                         Button(onClick = {
                             if(categoryName.isNotBlank()){
                                 val newCategory = Category(
-                                    id = java.util.UUID.randomUUID().toString(),
+                                    id = UUID.randomUUID().toString(),
                                     name = categoryName.trim(),
-                                    color = "#6200EE",
-                                    icon = "folder"
+                                    createAt = currentTime,
+                                    updateAt = currentTime,
                                 )
                                 viewModel.addCategory(newCategory)
 

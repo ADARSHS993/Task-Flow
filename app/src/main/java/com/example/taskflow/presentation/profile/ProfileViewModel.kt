@@ -1,7 +1,9 @@
 package com.example.taskflow.presentation.profile
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.taskflow.data.remote.firestore.FirestoreProfileDataSource
 import com.example.taskflow.domain.usecase.profile.ChangePasswordUseCase
 import com.example.taskflow.domain.usecase.profile.GetProfileUseCase
 import com.example.taskflow.domain.usecase.profile.LogoutUseCase
@@ -19,14 +21,93 @@ class ProfileViewModel @Inject constructor(
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val changePasswordUseCase: ChangePasswordUseCase,
     private val logoutUseCase: LogoutUseCase,
+
+    private val firestoreProfileDataSource: FirestoreProfileDataSource
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ProfileUiState())
 
+    private val _photoUrl = MutableStateFlow<String?>(null)
+    val photoUrl = _photoUrl.asStateFlow()
+    private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         loadProfile()
+        loadPhotoUrl()
+    }
+
+    private fun loadPhotoUrl() {
+
+        viewModelScope.launch {
+
+            try {
+
+                _photoUrl.value = firestoreProfileDataSource.getPhotoUrl()
+            } catch (e: Exception){
+
+                _uiState.update {
+                    it.copy(
+                        error = e.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun uploadProfileImage(uri: Uri) {
+
+        viewModelScope.launch {
+
+            try {
+
+                _uiState.update {
+                    it.copy(
+                        isUpdating = true,
+                        error = null
+                    )
+                }
+
+                // Get current image URL
+                val oldPhotoUrl =
+                    _photoUrl.value
+
+                // Upload new image
+                val newPhotoUrl =
+                    firestoreProfileDataSource
+                        .uploadProfileImage(uri)
+
+                // Save new URL in Firestore
+                firestoreProfileDataSource
+                    .savePhotoUrl(newPhotoUrl)
+
+                // Update UI immediately
+                _photoUrl.value = newPhotoUrl
+
+                // Delete previous image
+                if (
+                    !oldPhotoUrl.isNullOrBlank() &&
+                    oldPhotoUrl != newPhotoUrl
+                ) {
+                    firestoreProfileDataSource
+                        .deleteOldProfileImage(oldPhotoUrl)
+                }
+
+                _uiState.update {
+                    it.copy(
+                        isUpdating = false
+                    )
+                }
+
+            } catch (e: Exception) {
+
+                _uiState.update {
+                    it.copy(
+                        isUpdating = false,
+                        error = e.message
+                    )
+                }
+            }
+        }
     }
 
     private fun loadProfile() {

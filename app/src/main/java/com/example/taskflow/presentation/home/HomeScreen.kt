@@ -38,8 +38,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.taskflow.domain.model.Priority
 import com.example.taskflow.domain.model.Project
 import com.example.taskflow.domain.model.Task
+import com.example.taskflow.presentation.components.ProfileAvatar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -66,11 +65,11 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onMenuClick: () -> Unit = {},
     onAddProject: () -> Unit,
     onProjectClick: (Project) -> Unit,
     onTaskClick: (Task) -> Unit,
-    onNavigateToLogin: () -> Unit
+    photoUrl: String?,
+    onNavigateToProfile : () -> Unit
 ){
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -83,7 +82,10 @@ fun HomeScreen(
         containerColor = Color(0xFFF8F8FC),
 
         topBar = {
-           HomeTopBar()
+           HomeTopBar(
+               photoUrl = photoUrl,
+               onProfileClick = onNavigateToProfile
+           )
         },
 
         floatingActionButton = {
@@ -322,7 +324,10 @@ fun HomeScreen(
 }
 
 @Composable
-fun HomeTopBar() {
+fun HomeTopBar(
+    photoUrl: String?,
+    onProfileClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -350,20 +355,14 @@ fun HomeTopBar() {
             modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE0E0E0)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile",
-                    tint = Color.DarkGray,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                IconButton(
+                    onClick = onProfileClick
+                ) {
+                    ProfileAvatar(
+                        photoUrl = photoUrl,
+                        modifier = Modifier.size(34.dp)
+                    )
+                }
         }
 
         Spacer(

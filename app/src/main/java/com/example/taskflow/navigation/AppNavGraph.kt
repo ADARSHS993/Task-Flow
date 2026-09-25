@@ -7,11 +7,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.taskflow.presentation.Theme.ThemeViewModel
 import com.example.taskflow.presentation.auth.forgotpassword.ForgotPasswordScreen
 import com.example.taskflow.presentation.auth.login.LoginScreen
 import com.example.taskflow.presentation.auth.register.RegisterScreen
@@ -21,6 +23,7 @@ import com.example.taskflow.presentation.home.AddEditProjectScreen
 import com.example.taskflow.presentation.home.HomeScreen
 import com.example.taskflow.presentation.home.HomeViewModel
 import com.example.taskflow.presentation.profile.ProfileScreen
+import com.example.taskflow.presentation.profile.ProfileViewModel
 import com.example.taskflow.presentation.statistics.StatsScreen
 import com.example.taskflow.presentation.tasks.TaskScreen
 import com.example.taskflow.presentation.tasks.TaskViewModel
@@ -30,6 +33,8 @@ import com.example.taskflow.presentation.tasks.addEditTaskScreen
 fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
     startDestination: String = AppDestination.Splash.route,
+    profileViewModel: ProfileViewModel = hiltViewModel(),
+    themeViewModel: ThemeViewModel
 ) {
 
     val navBackStackEntry by
@@ -101,6 +106,8 @@ fun AppNavGraph(
 
     ) { paddingValues ->
 
+        val photoUrl by profileViewModel.photoUrl.collectAsStateWithLifecycle()
+
         NavHost(
 
             navController = navController,
@@ -171,12 +178,13 @@ fun AppNavGraph(
             // Home Destination
             composable(AppDestination.Home.route) {
                 HomeScreen(
+                    photoUrl = photoUrl,
                     onAddProject = {
                         navController.navigate(
                             AppDestination.AddProject.route
                         )
                     },
-                    onProjectClick = {project ->
+                    onProjectClick = { project ->
                         navController.navigate(
                             AppDestination.ProjectTasks.createRoute(
                                 project.id
@@ -190,14 +198,10 @@ fun AppNavGraph(
                             )
                         )
                     },
-                    onNavigateToLogin = {
+                    onNavigateToProfile = {
                         navController.navigate(
-                            AppDestination.Login.route
-                        ) {
-                            popUpTo(0) {
-                                inclusive = true
-                            }
-                        }
+                            AppDestination.Profile.route
+                        )
                     }
                 )
             }
@@ -220,12 +224,18 @@ fun AppNavGraph(
             // Task Destination
             composable(AppDestination.Task.route) {
                 TaskScreen(
+                    photoUrl = photoUrl,
                     onAddTask = {
                         navController.navigate(AppDestination.AddTask.route)
                     },
                     onTaskClick = { task ->
                         navController.navigate(
                             AppDestination.EditTask.createRoute(task.id)
+                        )
+                    },
+                    onNavigateToProfile = {
+                        navController.navigate(
+                            AppDestination.Profile.route
                         )
                     }
                 )
@@ -241,6 +251,7 @@ fun AppNavGraph(
                     backStackEntry.arguments?.getString("projectId")
 
                 TaskScreen(
+                    photoUrl = photoUrl,
                     projectId = projectId,
 
                     onAddTask = {
@@ -252,6 +263,11 @@ fun AppNavGraph(
                     onTaskClick = { task ->
                         navController.navigate(
                             AppDestination.EditTask.createRoute(task.id)
+                        )
+                    },
+                    onNavigateToProfile = {
+                        navController.navigate(
+                            AppDestination.Profile.route
                         )
                     }
                 )
@@ -326,6 +342,7 @@ fun AppNavGraph(
                 route = AppDestination.Profile.route
             ){
                 ProfileScreen(
+                    themeViewModel = themeViewModel,
                     onLogout = {
                         navController.navigate(
                             AppDestination.Login.route
@@ -347,9 +364,15 @@ fun AppNavGraph(
                             AppDestination.AddTask.createRoute(null)
                         )
                     },
-                    onTaskClick = {task ->
+                    onTaskClick = { task ->
                         navController.navigate(
                             AppDestination.EditTask.createRoute(task.id)
+                        )
+                    },
+                    photoUrl = photoUrl,
+                    onNavigateToProfile = {
+                        navController.navigate(
+                            AppDestination.Profile.route
                         )
                     }
                 )
@@ -358,7 +381,14 @@ fun AppNavGraph(
             composable(
                 AppDestination.Stats.route
             ){
-                StatsScreen()
+                StatsScreen(
+                    photoUrl = photoUrl,
+                    onNavigateToProfile = {
+                        navController.navigate(
+                            AppDestination.Profile.route
+                        )
+                    }
+                )
             }
         }
     }

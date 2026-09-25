@@ -1,6 +1,5 @@
 package com.example.taskflow.presentation.calendar
 
-import android.R.attr.tint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +26,6 @@ import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialogDefaults.containerColor
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -47,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.taskflow.domain.model.Task
+import com.example.taskflow.presentation.components.ProfileAvatar
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -65,7 +64,9 @@ private val EventCardColor = Color(0xFFEFF2FF)
 fun CalendarScreen(
     onAddTask: () -> Unit,
     onTaskClick: (Task) -> Unit,
-    viewModel: CalendarViewModel = hiltViewModel()
+    viewModel: CalendarViewModel = hiltViewModel(),
+    photoUrl: String?,
+    onNavigateToProfile : () -> Unit
 ){
 
     val state by viewModel.uiState
@@ -75,7 +76,10 @@ fun CalendarScreen(
         containerColor = BackgroundColor,
 
         topBar = {
-            CalendarTopBar()
+            CalendarTopBar(
+                photoUrl = photoUrl,
+                onProfileClick = onNavigateToProfile
+            )
         },
 
         floatingActionButton = {
@@ -761,7 +765,7 @@ private fun CalendarDateCell(
 }
 
 @Composable
-fun CalendarTopBar(){
+fun CalendarTopBar(photoUrl: String?, onProfileClick: () -> Unit) {
 
     Row(
        modifier = Modifier
@@ -798,20 +802,15 @@ fun CalendarTopBar(){
             )
         }
 
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE0E0E0)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile",
-                tint = Color.DarkGray,
-                modifier = Modifier.size(20.dp)
-            )
-        }
+
+            IconButton(
+                onClick = onProfileClick
+            ) {
+                ProfileAvatar(
+                    photoUrl = photoUrl,
+                    modifier = Modifier.size(34.dp)
+                )
+            }
 
         Spacer(
             modifier = Modifier.width(6.dp)

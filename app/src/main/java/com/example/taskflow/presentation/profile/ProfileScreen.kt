@@ -1,5 +1,11 @@
 package com.example.taskflow.presentation.profile
 
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
@@ -31,7 +38,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomAppBarDefaults.windowInsets
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -46,7 +52,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -65,6 +71,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.example.taskflow.presentation.Theme.ThemeViewModel
+import com.example.taskflow.presentation.components.ProfileAvatar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,9 +80,21 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onMenuClick: () -> Unit = {},
     onLogout: () -> Unit,
+    themeViewModel: ThemeViewModel,
 ) {
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val photoUrl by viewModel.photoUrl.collectAsStateWithLifecycle()
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+
+        uri?.let {
+            viewModel.uploadProfileImage(it)
+        }
+    }
 
     var showLogoutDialog by remember {
         mutableStateOf(false)
@@ -84,12 +104,14 @@ fun ProfileScreen(
         mutableStateOf(true)
     }
 
-    var darkModeEnabled by remember {
-        mutableStateOf(false)
-    }
+    val darkModeEnabled by themeViewModel.isDarkMode.collectAsStateWithLifecycle()
 
     var showEditDialog by remember {
         mutableStateOf(false)
+    }
+
+    var expandedSection by remember {
+        mutableStateOf<String?>(null)
     }
 
     val profile = state.profile
@@ -121,22 +143,10 @@ fun ProfileScreen(
 
                 },
                 actions = {
-
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFE0E0E0)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Profile",
-                            tint = Color.DarkGray,
-                            modifier = Modifier.size(20.dp)
+                        ProfileAvatar(
+                            photoUrl = photoUrl,
+                            modifier = Modifier.size(34.dp)
                         )
-                    }
-
                 },
             )
 
@@ -165,9 +175,9 @@ fun ProfileScreen(
                         .clip(CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (profile?.photoUrl != null) {
+                    if (!photoUrl.isNullOrBlank()) {
                         AsyncImage(
-                            model = profile.photoUrl,
+                            model = photoUrl,
                             contentDescription = "Profile picture",
                             modifier = Modifier
                                 .fillMaxSize()
@@ -192,14 +202,14 @@ fun ProfileScreen(
                         .background(Color(0xFF4433D7))
                         .align(Alignment.BottomEnd)
                         .clickable {
-                            showEditDialog = true
+                            imagePickerLauncher.launch("image/*")
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit Profile",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.surface,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -216,7 +226,7 @@ fun ProfileScreen(
                     ?: "TaskFlow User",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(
@@ -227,7 +237,21 @@ fun ProfileScreen(
             Text(
                 text = profile?.email ?: "",
                 fontSize = 11.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
+
+            Text(
+                text = "Edit Profile",
+                fontSize = 11.sp,
+                color = Color(0xFF4433D7),
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.clickable {
+                    showEditDialog = true
+                }
             )
 
             Spacer(
@@ -267,7 +291,7 @@ fun ProfileScreen(
                                 imageVector =
                                     Icons.Default.Star,
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = MaterialTheme.colorScheme.surface,
                                 modifier = Modifier.size(18.dp)
                             )
 
@@ -278,7 +302,7 @@ fun ProfileScreen(
                             Text(
                                 text = "Tasks Completed",
                                 fontSize = 10.sp,
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.surface
                             )
                         }
 
@@ -290,7 +314,7 @@ fun ProfileScreen(
                             text = "124",
                             fontSize = 27.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.surface
                         )
 
                         Text(
@@ -371,7 +395,7 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(
-                    contentColor = Color.White
+                    contentColor = MaterialTheme.colorScheme.surface
                 )
             ) {
                 //Dark Mode
@@ -381,7 +405,7 @@ fun ProfileScreen(
                     title = "Dark Mode",
                     checked = darkModeEnabled,
                     onCheckedChange = {
-                        darkModeEnabled = it
+                        themeViewModel.setDarkMode(it)
                     }
                 )
 
@@ -401,25 +425,60 @@ fun ProfileScreen(
 
                 //Privacy
 
-                SettingRow(
+                SettingExpandableRow(
                     icon = Icons.Default.Lock,
                     title = "Privacy Policy",
+                    expanded = expandedSection == "privacy",
                     onClick = {
-                        // Open privacy policy
+                        expandedSection =
+                            if (expandedSection == "privacy") null else "privacy"
                     }
                 )
+
+                AnimatedVisibility(
+                    visible = expandedSection == "privacy"
+                ) {
+                    InfoContentCard(
+                        title = "Privacy Policy",
+                        paragraphs = listOf(
+                            "TaskFlow is designed to help you manage tasks, projects, categories, calendar activities, and productivity information.",
+                            "TaskFlow uses Firebase Authentication to allow users to create an account and securely sign in to the application.",
+                            "Task and project information may be stored locally on your device and synchronized with Firebase services when cloud synchronization is enabled.",
+                            "Profile pictures are uploaded to Firebase Storage and the corresponding image URL is stored with your profile information.",
+                            "Your information is used to provide the features of TaskFlow and is not displayed publicly through the application.",
+                            "You should update this policy before publishing the application to accurately describe your final data collection, storage, analytics, and third-party services."
+                        )
+                    )
+                }
 
                 SettingDivider()
 
                 // About
 
-                SettingRow(
+                SettingExpandableRow(
                     icon = Icons.Default.Info,
                     title = "About TaskFlow",
+                    expanded = expandedSection == "about",
                     onClick = {
-                        // Open about page
+                        expandedSection =
+                            if (expandedSection == "about") null else "about"
                     }
                 )
+
+                AnimatedVisibility(
+                    visible = expandedSection == "about"
+                ) {
+                    InfoContentCard(
+                        title = "About TaskFlow",
+                        paragraphs = listOf(
+                            "TaskFlow is a productivity and task management application designed to help users organize their daily work.",
+                            "You can create and manage tasks, organize tasks into projects and categories, set priorities, and add due dates.",
+                            "TaskFlow also provides calendar-based task management and productivity statistics to help you understand your progress.",
+                            "The application supports user authentication and cloud synchronization so that important application data can be associated with your account.",
+                            "TaskFlow is built with modern Android technologies including Kotlin and Jetpack Compose."
+                        )
+                    )
+                }
             }
 
             Spacer(
@@ -520,6 +579,111 @@ fun ProfileScreen(
 }
 
 @Composable
+fun SettingExpandableRow(icon: ImageVector, title: String, expanded: Boolean, onClick: () -> Unit) {
+    val rotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        label = "arrowRotation"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .clickable {
+                onClick()
+            }
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(
+                    MaterialTheme.colorScheme.surfaceVariant
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(17.dp)
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.width(12.dp)
+        )
+
+        Text(
+            text = title,
+            modifier = Modifier.weight(1f),
+            fontSize = 11.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Icon(
+            imageVector = Icons.Default.ExpandMore,
+            contentDescription = if (expanded) {
+                "Collapse"
+            } else {
+                "Expand"
+            },
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .size(22.dp)
+                .rotate(rotation)
+        )
+    }
+}
+
+@Composable
+fun InfoContentCard(title: String, paragraphs: List<String>) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant
+            )
+            .padding(
+                horizontal = 16.dp,
+                vertical = 14.dp
+            )
+    ) {
+
+        Text(
+            text = title,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        paragraphs.forEach { paragraph ->
+
+            Text(
+                text = paragraph,
+                fontSize = 11.sp,
+                lineHeight = 17.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(
+                    bottom = 10.dp
+                )
+            )
+        }
+    }
+}
+
+fun onClick() {
+    TODO("Not yet implemented")
+}
+
+@Composable
 private fun EditProfileDialog(
     currentName: String,
     onDismiss: () -> Unit,
@@ -600,27 +764,26 @@ private fun SettingRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(64.dp)
-            .clickable {
-                onClick()
-            }
+            .clickable { onClick() }
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         Box(
             modifier = Modifier
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFE8EEFC)),
+                .background(
+                    MaterialTheme.colorScheme.surfaceVariant
+                ),
             contentAlignment = Alignment.Center
         ) {
-
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color(0xFF52628B),
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(17.dp)
             )
-
         }
 
         Spacer(
@@ -631,13 +794,13 @@ private fun SettingRow(
             text = title,
             modifier = Modifier.weight(1f),
             fontSize = 11.sp,
-            color = Color(0xFF1C2340)
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Icon(
             imageVector = Icons.Default.ArrowForwardIos,
             contentDescription = null,
-            tint = Color(0xFFB8BBD0),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(13.dp)
         )
     }
@@ -708,7 +871,9 @@ private fun SettingDivider() {
         modifier = Modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(Color(0xFFF0F0F5))
+            .background(
+                MaterialTheme.colorScheme.outlineVariant
+            )
     )
 
 }

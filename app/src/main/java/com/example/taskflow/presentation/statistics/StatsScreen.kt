@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.taskflow.domain.model.Category
 import com.example.taskflow.domain.model.Task
+import com.example.taskflow.presentation.components.ProfileAvatar
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -59,7 +59,9 @@ private val MutedText = Color(0xFF7D7D89)
 
 @Composable
 fun StatsScreen(
-    viewModel: StateViewModel = hiltViewModel()
+    viewModel: StateViewModel = hiltViewModel(),
+    photoUrl: String?,
+    onNavigateToProfile : () -> Unit
 ){
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -68,7 +70,10 @@ fun StatsScreen(
         containerColor = StatsBackground,
 
         topBar = {
-            StatsTopBar()
+            StatsTopBar(
+                photoUrl = photoUrl,
+                onProfileClick = onNavigateToProfile
+            )
         }
     ){ innerPadding ->
 
@@ -145,7 +150,10 @@ fun StatsScreen(
 
 
 @Composable
-private fun StatsTopBar(){
+private fun StatsTopBar(
+    photoUrl : String?,
+    onProfileClick : () -> Unit
+){
 
     Row(
         modifier = Modifier
@@ -171,20 +179,14 @@ private fun StatsTopBar(){
             fontWeight = FontWeight.Medium,
             color = Color(0xFF2F1FC6)
         )
+            IconButton(
+                onClick = onProfileClick
+            ) {
+                ProfileAvatar(
+                    photoUrl = photoUrl,
+                    modifier = Modifier.size(34.dp)
+                )
 
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE0E0E0)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile",
-                tint = Color.DarkGray,
-                modifier = Modifier.size(20.dp)
-            )
         }
 
         Spacer(

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.taskflow.domain.model.Category
 import com.example.taskflow.domain.model.Priority
 import com.example.taskflow.domain.model.Task
+import com.example.taskflow.presentation.components.ProfileAvatar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -47,10 +47,12 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskScreen(
-    projectId : String? = null,
+    projectId: String? = null,
     viewModel: TaskViewModel = hiltViewModel(),
     onAddTask: () -> Unit,
     onTaskClick: (Task) -> Unit,
+    photoUrl: String?,
+    onNavigateToProfile: () -> Unit
 ) {
 
     val state by viewModel.uiState.collectAsState()
@@ -70,7 +72,10 @@ fun TaskScreen(
     Scaffold(
         containerColor = Color(0xFFF8F8FC),
         topBar = {
-            TaskTopBar()
+            TaskTopBar(
+                photoUrl = photoUrl,
+                onProfileClick = onNavigateToProfile
+            )
         },
         floatingActionButton = {
 
@@ -251,7 +256,10 @@ fun TaskScreen(
 }
 
 @Composable
-fun TaskTopBar() {
+fun TaskTopBar(
+    photoUrl : String?,
+    onProfileClick : () -> Unit
+) {
 
     Row(
         modifier = Modifier
@@ -280,18 +288,12 @@ fun TaskTopBar() {
             modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE0E0E0)),
-                contentAlignment = Alignment.Center
+                IconButton(
+                onClick = onProfileClick
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile",
-                    tint = Color.DarkGray,
-                    modifier = Modifier.size(20.dp)
+                ProfileAvatar(
+                    photoUrl = photoUrl,
+                    modifier = Modifier.size(34.dp)
                 )
             }
         }

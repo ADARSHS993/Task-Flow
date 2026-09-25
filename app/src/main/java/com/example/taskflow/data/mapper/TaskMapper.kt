@@ -25,8 +25,8 @@ fun CategoryEntity.toDomain(): Category{
     return Category(
         id = id,
         name = name,
-        color = color.toString(),
-        icon = icon
+        createAt = createAt,
+        updateAt = updateAt
     )
 }
 
@@ -34,8 +34,8 @@ fun Category.toEntity(): CategoryEntity{
     return CategoryEntity(
         id = id,
         name = name,
-        color = color,
-        icon = icon
+        createAt = createAt,
+        updateAt = updateAt
     )
 }
 
