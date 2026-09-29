@@ -3,6 +3,7 @@ package com.example.taskflow.presentation.profile
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import android.net.Uri
+import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -73,6 +74,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.taskflow.presentation.Theme.ThemeViewModel
 import com.example.taskflow.presentation.components.ProfileAvatar
+import java.util.jar.Manifest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,6 +101,13 @@ fun ProfileScreen(
     var showLogoutDialog by remember {
         mutableStateOf(false)
     }
+
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ){granted ->
+            
+        }
 
     var notificationsEnabled by remember {
         mutableStateOf(true)
@@ -417,7 +426,13 @@ fun ProfileScreen(
                     icon = Icons.Default.Notifications,
                     title = "Notifications",
                     onClick = {
-                        // Open notification settings
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+                            notificationPermissionLauncher.launch(
+                                android.Manifest.permission.POST_NOTIFICATIONS
+                            )
+
+                        }
                     }
                 )
 

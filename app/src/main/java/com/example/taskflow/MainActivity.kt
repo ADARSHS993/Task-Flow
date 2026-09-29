@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.taskflow.navigation.AppNavGraph
 import com.example.taskflow.presentation.Theme.ThemeViewModel
+import com.example.taskflow.presentation.notification.NotificationHelper
 import com.example.taskflow.ui.theme.TaskFlowTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -19,6 +20,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        NotificationHelper.createNotificationChannel(this)
 
         enableEdgeToEdge()
 

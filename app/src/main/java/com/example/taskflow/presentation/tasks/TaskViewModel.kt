@@ -1,5 +1,6 @@
 package com.example.taskflow.presentation.tasks
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskflow.domain.model.Category
@@ -14,7 +15,9 @@ import com.example.taskflow.domain.usecase.task.GetAllTasksUSeCase
 import com.example.taskflow.domain.usecase.task.GetCategoryUseCase
 import com.example.taskflow.domain.usecase.task.GetTasksByProjectUseCase
 import com.example.taskflow.domain.usecase.task.UpdateTaskUseCase
+import com.example.taskflow.presentation.notification.TaskReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
@@ -37,7 +40,9 @@ class TaskViewModel @Inject constructor(
     private val addCategoryUseCase : AddCategoryUseCase,
     private val deleteCategoryUseCase : DeleteCategoryUsecase,
 
-    private val getAllProjectsUseCase : GetAllProjectsUseCase
+    private val getAllProjectsUseCase : GetAllProjectsUseCase,
+
+    @ApplicationContext private val context: Context
     ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TaskUiState())
@@ -157,6 +162,13 @@ class TaskViewModel @Inject constructor(
 
         viewModelScope.launch {
             addTaskUseCase(task)
+
+            TaskReminderScheduler.scheduleTaskReminders(
+                context = context,
+                taskId = task.id,
+                taskTitle = task.title,
+                dueDate = task.dueDate
+            )
         }
     }
 
@@ -164,6 +176,27 @@ class TaskViewModel @Inject constructor(
 
         viewModelScope.launch {
             updateTaskUseCase(task)
+
+            val updateTask = task.copy(
+                updatedAt = System.currentTimeMillis()
+            )
+
+            updateTaskUseCase(updateTask)
+
+            if(updateTask.isCompleted){
+                TaskReminderScheduler.cancelTaskReminders(
+                    context = context,
+                    taskId = updateTask.id
+                )
+            } else{
+
+                TaskReminderScheduler.scheduleTaskReminders(
+                    context = context,
+                    taskId = updateTask.id,
+                    taskTitle = updateTask.title,
+                    dueDate = updateTask.dueDate
+                )
+            }
         }
 
     }
@@ -188,13 +221,38 @@ class TaskViewModel @Inject constructor(
             updatedAt = System.currentTimeMillis()
         )
 
-        updateTask(updatedTask)
+        viewModelScope.launch {
+
+            // First cancel old reminders
+            TaskReminderScheduler.cancelTaskReminders(
+                context = context,
+                taskId = updatedTask.id
+            )
+
+            // Save updated task
+            updateTaskUseCase(updatedTask)
+
+            // Schedule new reminders only if still pending
+            if (!updatedTask.isCompleted) {
+                TaskReminderScheduler.scheduleTaskReminders(
+                    context = context,
+                    taskId = updatedTask.id,
+                    taskTitle = updatedTask.title,
+                    dueDate = updatedTask.dueDate
+                )
+            }
+        }
     }
 
     fun deleteTask(task: Task) {
 
         viewModelScope.launch {
             deleteTaskUseCase(task)
+
+            TaskReminderScheduler.cancelTaskReminders(
+                context = context,
+                taskId = task.id
+            )
         }
 
     }
@@ -206,7 +264,30 @@ class TaskViewModel @Inject constructor(
             updatedAt = System.currentTimeMillis()
         )
 
-        updateTask(updatedTask)
+
+        viewModelScope.launch {
+
+            updateTaskUseCase(updatedTask)
+
+            if (updatedTask.isCompleted) {
+
+                // Task completed -> cancel reminders
+                TaskReminderScheduler.cancelTaskReminders(
+                    context = context,
+                    taskId = updatedTask.id
+                )
+
+            } else {
+
+                // Task reopened -> schedule again
+                TaskReminderScheduler.scheduleTaskReminders(
+                    context = context,
+                    taskId = updatedTask.id,
+                    taskTitle = updatedTask.title,
+                    dueDate = updatedTask.dueDate
+                )
+            }
+        }
 
     }
 
