@@ -166,7 +166,7 @@ fun RegisterScreen(
                         value = uiState.fullName,
                         onValueChange = viewModel::onFullNameChanged,
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Alex Rivera", color = Color(0xFF9CA3AF)) },
+                        placeholder = { Text("ADARSH PATEL", color = Color(0xFF9CA3AF)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Person,
@@ -219,7 +219,7 @@ fun RegisterScreen(
                         value = uiState.email,
                         onValueChange = viewModel::onEmailChanged,
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("alex@taskflow.com", color = Color(0xFF9CA3AF)) },
+                        placeholder = { Text("adarsh@gmail.com", color = Color(0xFF9CA3AF)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Email,

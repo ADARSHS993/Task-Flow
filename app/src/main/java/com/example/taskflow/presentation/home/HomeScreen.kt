@@ -56,6 +56,7 @@ import com.example.taskflow.domain.model.Priority
 import com.example.taskflow.domain.model.Project
 import com.example.taskflow.domain.model.Task
 import com.example.taskflow.presentation.components.ProfileAvatar
+import com.example.taskflow.presentation.profile.ProfileViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -65,12 +66,17 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
+    viewModell: ProfileViewModel = hiltViewModel(),
     onAddProject: () -> Unit,
     onProjectClick: (Project) -> Unit,
     onTaskClick: (Task) -> Unit,
     photoUrl: String?,
     onNavigateToProfile : () -> Unit
 ){
+
+    val statee by viewModell.uiState.collectAsStateWithLifecycle()
+
+    val profile = statee.profile
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -121,7 +127,7 @@ fun HomeScreen(
                 //Greeting
 
                 Text(
-                    text = "Good morning , Adarsh",
+                    text = "Good morning , ${profile?.name}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black,

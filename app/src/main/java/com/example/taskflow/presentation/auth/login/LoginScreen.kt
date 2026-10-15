@@ -166,7 +166,7 @@ fun LoginScreen(
                         value = uiState.email,
                         onValueChange = viewModel::onEmailChanged,
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("alex@example.com", color = Color(0xFF9CA3AF)) },
+                        placeholder = { Text("adarsh@example.com", color = Color(0xFF9CA3AF)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Email,
